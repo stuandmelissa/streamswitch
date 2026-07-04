@@ -1,75 +1,233 @@
-# React + TypeScript + Vite
+# StreamSwitch
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Instantly switch Apple TVs between VPN regions on a UniFi Dream Router.
 
-Currently, two official plugins are available:
+StreamSwitch provides a simple web interface that allows you to change the VPN traffic route assigned to individual Apple TVs without opening the UniFi Network application.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🌎 One-click VPN region switching
+- 🇺🇸 Local (USA / No VPN) mode
+- 📺 Multiple Apple TV support
+- ⚡ Live status directly from UniFi
+- 🔒 SSH-based integration (no browser automation)
+- 💻 Responsive React dashboard
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Supported Regions
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 🇺🇸 USA (No VPN)
+- 🇨🇦 Canada
+- 🇬🇧 United Kingdom
+- 🇯🇵 Japan
+- 🇦🇺 Australia
+- 🇩🇪 Germany
+- 🇫🇷 France
+- 🇪🇸 Spain
+- 🇳🇱 Netherlands
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Architecture
 
 ```
+                React UI
+                    │
+                    ▼
+             Express API (Node)
+                    │
+                    ▼
+             SSH to Dream Router
+                    │
+                    ▼
+        MongoDB traffic_route collection
+                    │
+                    ▼
+        UniFi applies VPN immediately
+```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Unlike browser automation, StreamSwitch talks directly to the Dream Router over SSH and updates the internal traffic routing configuration.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Screens
+
+Current dashboard
+
+- Living Room
+- Basement
+- Bedroom
+
+Each device displays:
+
+- Current region
+- Available regions
+- One-click switching
+
+---
+
+# Requirements
+
+- UniFi Dream Router
+- SSH enabled
+- Node.js 22+
+- npm
+
+---
+
+# Installation
+
+Clone the repository
+
+```bash
+git clone git@github.com:stuandmelissa/streamswitch.git
+cd streamswitch
+```
+
+Install dependencies
+
+```bash
+npm install
+```
+
+Create a `.env`
+
+```env
+PORT=3333
+
+UDR_HOST=192.168.1.1
+UDR_USER=root
+UDR_PASS=YOUR_UDR_SSH_PASSWORD
+```
+
+Start development
+
+```bash
+npm run dev:all
+```
+
+Frontend
 
 ```
+http://localhost:5173
+```
+
+Backend
+
+```
+http://localhost:3333
+```
+
+---
+
+# API
+
+## Health
+
+```
+GET /health
+```
+
+Response
+
+```json
+{
+  "ok": true
+}
+```
+
+---
+
+## Get Devices
+
+```
+GET /api/devices
+```
+
+Example
+
+```json
+[
+  {
+    "id": "living-room",
+    "name": "Living Room",
+    "current": "australia"
+  }
+]
+```
+
+---
+
+## Switch Region
+
+```
+POST /api/switch
+```
+
+Example
+
+```json
+{
+  "device": "living-room",
+  "country": "japan"
+}
+```
+
+---
+
+# Project Structure
+
+```
+server/
+    config.ts
+    index.ts
+    streamConfig.ts
+    switcher.ts
+    unifi.ts
+
+src/
+    App.tsx
+    App.css
+```
+
+---
+
+# Current Status
+
+✅ React dashboard
+
+✅ Express API
+
+✅ Live UniFi status
+
+✅ SSH integration
+
+✅ USA (No VPN)
+
+✅ Multiple Apple TVs
+
+---
+
+# Roadmap
+
+## Planned
+
+- Authentication
+- Favorites
+- Home Assistant integration
+- Scheduling
+- Better animations
+- Device icons
+- Auto-refresh status
+- Docker deployment
+- Configuration UI
+- Remote access
+
+---
+
+# License
+
+MIT
